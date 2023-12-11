@@ -8,16 +8,16 @@ import com.paypal.checkout.approve.Approval;
 import com.paypal.checkout.error.ErrorInfo;
 import com.paypal.checkout.shipping.ShippingChangeActions;
 import com.paypal.checkout.shipping.ShippingChangeData;
-import com.alcampospalacios.paypal.paypal_native_checkout.FlutterPaypalNativePlugin;
+import com.alcampospalacios.paypal.paypal_native_checkout.PaypalNativeCheckoutPlugin;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.approvaldata.PPApprovalData;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.shippingdata.PSShippingChangeDataHelper;
 
 import java.util.HashMap;
 
 public class PayPalCallBackHelper {
-    FlutterPaypalNativePlugin flutterPaypalPlugin;
+    PaypalNativeCheckoutPlugin flutterPaypalPlugin;
 
-    public PayPalCallBackHelper(FlutterPaypalNativePlugin flutterPaypalPlugin) {
+    public PayPalCallBackHelper(PaypalNativeCheckoutPlugin flutterPaypalPlugin) {
         this.flutterPaypalPlugin = flutterPaypalPlugin;
     }
 

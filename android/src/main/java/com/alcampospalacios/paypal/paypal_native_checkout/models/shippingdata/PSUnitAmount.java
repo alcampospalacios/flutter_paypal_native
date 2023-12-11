@@ -1,11 +1,11 @@
-package com.piccmaq.flutter_paypal_native.models.shippingdata;
+package com.alcampospalacios.paypal.paypal_native_checkout.models.shippingdata;
 
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.paypal.checkout.order.UnitAmount;
-import com.piccmaq.flutter_paypal_native.models.CurrencyCodeHelper;
-import com.piccmaq.flutter_paypal_native.models.approvaldata.PPAmount;
+import com.alcampospalacios.paypal.paypal_native_checkout.models.CurrencyCodeHelper;
+import com.alcampospalacios.paypal.paypal_native_checkout.models.approvaldata.PPAmount;
 
 
 public class PSUnitAmount {

@@ -1,11 +1,11 @@
 
-package com.piccmaq.flutter_paypal_native.models.shippingdata;
+package com.alcampospalacios.paypal.paypal_native_checkout.models.shippingdata;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.paypal.checkout.createorder.ShippingType;
 import com.paypal.checkout.order.Options;
-import com.piccmaq.flutter_paypal_native.models.approvaldata.PPAmount;
+import com.alcampospalacios.paypal.paypal_native_checkout.models.approvaldata.PPAmount;
 
 import java.util.ArrayList;
 import java.util.List;

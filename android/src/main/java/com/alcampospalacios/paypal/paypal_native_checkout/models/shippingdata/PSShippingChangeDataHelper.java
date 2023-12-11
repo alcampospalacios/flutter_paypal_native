@@ -1,4 +1,4 @@
-package com.piccmaq.flutter_paypal_native.models.shippingdata;
+package com.alcampospalacios.paypal.paypal_native_checkout.models.shippingdata;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
