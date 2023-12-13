@@ -10,23 +10,19 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-import com.paypal.checkout.PayPalCheckout;
-import com.paypal.checkout.config.CheckoutConfig;
-import com.paypal.checkout.config.Environment;
-import com.paypal.checkout.createorder.CurrencyCode;
-import com.paypal.checkout.createorder.OrderIntent;
-import com.paypal.checkout.createorder.UserAction;
-import com.paypal.checkout.order.Amount;
-import com.paypal.checkout.order.AppContext;
-import com.paypal.checkout.order.OrderRequest;
-import com.paypal.checkout.order.PurchaseUnit;
+
+
+
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient;
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest;
+import com.paypal.android.corepayments.CoreConfig;
+import com.paypal.android.corepayments.Environment;
+
+import com.alcampospalacios.paypal.paypal_native_checkout.models.PayPalNativeCallBackHelper;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.CheckoutConfigStore;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.CurrencyCodeHelper;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.EnvironmentHelper;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.PayPalCallBackHelper;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.PurchaseUnitC;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.PurchaseUnitHelper;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.UserActionHelper;
+//import com.alcampospalacios.paypal.paypal_native_checkout.models.PayPalCallBackHelper;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +51,10 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
     private Application application;
     private CheckoutConfigStore checkoutConfigStore;
-    private PayPalCallBackHelper payPalCallBackHelper;
+//    private PayPalCallBackHelper payPalCallBackHelper;
     boolean initialisedPaypalConfig = false;
+
+    PayPalNativeCheckoutClient payPalNativeClient;
 
 
   @Override
@@ -108,20 +106,19 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         String returnUrl = call.argument("returnUrl");
         String clientId = call.argument("clientId");
         String payPalEnvironmentStr = call.argument("payPalEnvironment");
-        String currencyStr = call.argument("currency");
-        String userActionStr = call.argument("userAction");
 
-        CurrencyCode currency = (new CurrencyCodeHelper()).getEnumFromString(currencyStr);
-        UserAction userAction = (new UserActionHelper()).getEnumFromString(userActionStr);
         Environment payPalEnvironment = (new EnvironmentHelper()).getEnumFromString(payPalEnvironmentStr);
+
+        Log.d("initiatePackage", returnUrl);
+        Log.d("initiatePackage", clientId);
+        Log.d("initiatePackage", payPalEnvironmentStr);
 
         // store in checkoutconfigstore because application is sometimes null
         checkoutConfigStore = new CheckoutConfigStore(
                 clientId,
                 payPalEnvironment,
-                returnUrl,
-                currency,
-                userAction);
+                returnUrl
+               );
         result.success("completed");
     }
 
@@ -131,31 +128,47 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         if (checkoutConfigStore == null)
             return;
 
-        PayPalCheckout.setConfig(new CheckoutConfig(
+        Log.d("initialisePaypalConfig", "ok");
+
+
+        // Getting the new payPalNativeClient instance
+        CoreConfig coreConfig = new CoreConfig(checkoutConfigStore.clientId, checkoutConfigStore.payPalEnvironment);
+        payPalNativeClient = new PayPalNativeCheckoutClient(
                 application,
-                checkoutConfigStore.clientId,
-                checkoutConfigStore.payPalEnvironment,
-                checkoutConfigStore.currency,
-                checkoutConfigStore.userAction,
-                checkoutConfigStore.returnUrl));
-        payPalCallBackHelper = new PayPalCallBackHelper(this);
-        PayPalCheckout.registerCallbacks(
-                approval -> {
-                    // Order successfully captured
-                    payPalCallBackHelper.onPayPalApprove(approval);
-                },
-                (shippingData, shippingAction) -> {
-                    // called when shippinginfo changes
-                    payPalCallBackHelper.onPayPalShippingChange(shippingData, shippingAction);
-                },
-                () -> {
-                    // Optional callback for when a buyer cancels the paysheet
-                    payPalCallBackHelper.onPayPalCancel();
-                },
-                errorInfo -> {
-                    // Optional error callback
-                    payPalCallBackHelper.onPayPalError(errorInfo);
-                });
+                coreConfig,
+                checkoutConfigStore.returnUrl
+        );
+
+
+//        final PayPalCallBackHelper payPalCallBackHelper = new PayPalCallBackHelper(this);
+
+        // Creating a instance of listener to receive callback fron the listener client
+        PayPalNativeCallBackHelper payPalNativeCallBackHelper = new PayPalNativeCallBackHelper();
+
+        // Setting the client with our listener
+        payPalNativeClient.setListener(payPalNativeCallBackHelper);
+
+
+
+
+
+//        PayPalCheckout.registerCallbacks(
+//                approval -> {
+//                    // Order successfully captured
+//                    payPalCallBackHelper.onPayPalApprove(approval);
+//                },
+//                (shippingData, shippingAction) -> {
+//                    // called when shippinginfo changes
+//                    payPalCallBackHelper.onPayPalShippingChange(shippingData, shippingAction);
+//                },
+//                () -> {
+//                    // Optional callback for when a buyer cancels the paysheet
+//                    payPalCallBackHelper.onPayPalCancel();
+//                },
+//                errorInfo -> {
+//                    // Optional error callback
+//                    payPalCallBackHelper.onPayPalError(errorInfo);
+//                });
         initialisedPaypalConfig = true;
     }
 
@@ -164,43 +177,14 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
             initialisePaypalConfig();
         }
 
-        String purchaseUnitsStr = call.argument("purchaseUnits");
-        String userActionStr = call.argument("userAction");
-        UserAction userAction = (new UserActionHelper()).getEnumFromString(userActionStr);
-
-        List<PurchaseUnitC> purchaseUnitsC = (new PurchaseUnitHelper())
-                .convertJsonToArrayList(purchaseUnitsStr);
-        CurrencyCodeHelper helper = (new CurrencyCodeHelper());
+        String orderId = call.argument("orderId");
 
         try {
-            PayPalCheckout.startCheckout(
-                    createOrderActions -> {
-                        ArrayList<PurchaseUnit> purchaseUnits = new ArrayList<>();
-                        for (PurchaseUnitC purchaseUnit : purchaseUnitsC) {
-                            CurrencyCode currency = helper.getEnumFromString(
-                                    purchaseUnit.getCurrency());
-                            purchaseUnits.add(
-                                    new PurchaseUnit.Builder()
-                                            .amount(
-                                                    new Amount.Builder()
-                                                            .currencyCode(currency)
-                                                            .value(purchaseUnit.getPrice())
-                                                            .build())
-                                            .referenceId(purchaseUnit.getReferenceID())
-                                            .build());
-                        }
-                        OrderRequest order = new OrderRequest(
-                                OrderIntent.CAPTURE,
-                                new AppContext.Builder()
-                                        .userAction(userAction)
-                                        .build(),
-                                purchaseUnits);
-                        createOrderActions.create(order, orderId -> {
-                        });
-                    });
+            final PayPalNativeCheckoutRequest request = new PayPalNativeCheckoutRequest(orderId, null);
+            payPalNativeClient.startCheckout(request);
             result.success("completed");
         } catch (Exception e) {
-            Toast.makeText(application, "error occured while getting order", Toast.LENGTH_SHORT).show();
+            Toast.makeText(application, "error occurred while the checkout is processing", Toast.LENGTH_SHORT).show();
 
             result.error("completed", e.getMessage(), e.getMessage());
         }

@@ -1,6 +1,7 @@
 package com.alcampospalacios.paypal.paypal_native_checkout.models;
 
-import com.paypal.checkout.config.Environment;
+import com.paypal.android.corepayments.Environment;
+;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +11,6 @@ public class EnvironmentHelper {
 
     public  EnvironmentHelper(){
         data.put("sandbox",Environment.SANDBOX);
-        data.put("stage",Environment.STAGE);
-        data.put("local",Environment.LOCAL);
         data.put("live",Environment.LIVE);
     }
 

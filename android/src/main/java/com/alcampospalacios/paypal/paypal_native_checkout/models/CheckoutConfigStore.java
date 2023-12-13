@@ -1,29 +1,25 @@
 package com.alcampospalacios.paypal.paypal_native_checkout.models;
 
-import com.paypal.checkout.config.Environment;
-import com.paypal.checkout.createorder.CurrencyCode;
-import com.paypal.checkout.createorder.UserAction;
+import com.paypal.android.corepayments.Environment;
+
 
 public class CheckoutConfigStore {
 
    public String clientId ;
     public  Environment payPalEnvironment ;
     public  String returnUrl;
-    public CurrencyCode currency ;
-    public UserAction userAction ;
+
 
     public CheckoutConfigStore(
             String clientId,
             Environment payPalEnvironment,
-            String returnUrl,
-            CurrencyCode currency,
-            UserAction userAction
+            String returnUrl
+
     ) {
         this.payPalEnvironment = payPalEnvironment;
         this.clientId = clientId;
         this.returnUrl = returnUrl;
-        this.currency = currency;
-        this.userAction = userAction;
+
     }
 
 

@@ -6,12 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'models/approval/approval_data.dart';
-import 'models/custom/currency_code.dart';
 import 'models/custom/environment.dart';
 import 'models/custom/error_info.dart';
 import 'models/custom/order_callback.dart';
 import 'models/custom/purchase_unit.dart';
-import 'models/custom/user_action.dart';
 import 'models/shipping_change/shipping_info.dart';
 import 'paypal_native_checkout_platform_interface.dart';
 
@@ -54,10 +52,6 @@ class PaypalNativeCheckout {
     required String clientID,
     //which environmanet would you like to use
     required FPayPalEnvironment payPalEnvironment,
-    //which currncy would you like to use
-    required FPayPalCurrencyCode currencyCode,
-    //paynow or continue
-    required FPayPalUserAction action,
   }) async {
     _methodChannel.setMethodCallHandler(_handleMethod);
     _initiated = true;
@@ -67,12 +61,6 @@ class PaypalNativeCheckout {
       "clientId": clientID,
       "payPalEnvironment": FPayPalEnvironmentHelper.convertFromEnumToString(
         payPalEnvironment,
-      ),
-      "currency": FPayPalCurrencyCodeHelper.convertFromEnumToString(
-        currencyCode,
-      ),
-      "userAction": FPayPalUserActionHelper.convertFromEnumToString(
-        action,
       ),
     };
     await _methodChannel.invokeMethod<String>(
@@ -89,28 +77,11 @@ class PaypalNativeCheckout {
     return _instance!;
   }
 
-  ///adds an item to be purchased
-  ///@throws Exception if init()
-  ///was not called before this function
-  void addPurchaseUnit(FPayPalPurchaseUnit pUnit) {
-    if (!_initiated) {
-      throw Exception(
-        "you must initiate package first. call PaypalNativeCheckout.instance.init()",
-      );
-    }
-    purchaseUnits.add(pUnit);
-  }
-
-  ///paypal will throw an exception for too many items
-  bool get canAddMorePurchaseUnit {
-    return purchaseUnits.length < 5;
-  }
-
   ///starts an order of payment
   ///@throws Exception if init()
   ///was not called before this function
   Future<void> makeOrder({
-    FPayPalUserAction action = FPayPalUserAction.payNow,
+    required String orderId,
   }) async {
     if (!_initiated) {
       throw Exception(
@@ -118,15 +89,8 @@ class PaypalNativeCheckout {
       );
     }
 
-    String purchaseUnitsData = FPayPalPurchaseUnit.convertListToJson(
-      purchaseUnits,
-    );
-
     Map<String, String> data = {
-      "purchaseUnits": purchaseUnitsData,
-      "userAction": FPayPalUserActionHelper.convertFromEnumToString(
-        action,
-      ),
+      "orderId": orderId,
     };
 
     await _methodChannel.invokeMethod<String>('FlutterPaypal#makeOrder', data);
