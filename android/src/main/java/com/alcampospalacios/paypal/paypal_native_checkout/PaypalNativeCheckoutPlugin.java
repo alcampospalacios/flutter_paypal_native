@@ -56,6 +56,9 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
     PayPalNativeCheckoutClient payPalNativeClient;
 
+    // Creating a instance of listener to receive callback fron the listener client
+    PayPalNativeCallBackHelper payPalNativeCallBackHelper = new PayPalNativeCallBackHelper();
+
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -142,8 +145,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
 //        final PayPalCallBackHelper payPalCallBackHelper = new PayPalCallBackHelper(this);
 
-        // Creating a instance of listener to receive callback fron the listener client
-        PayPalNativeCallBackHelper payPalNativeCallBackHelper = new PayPalNativeCallBackHelper();
+
 
         // Setting the client with our listener
         payPalNativeClient.setListener(payPalNativeCallBackHelper);
@@ -182,7 +184,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         try {
             final PayPalNativeCheckoutRequest request = new PayPalNativeCheckoutRequest(orderId, null);
             payPalNativeClient.startCheckout(request);
-            result.success("completed");
+            payPalNativeCallBackHelper.setResult(result);
         } catch (Exception e) {
             Toast.makeText(application, "error occurred while the checkout is processing", Toast.LENGTH_SHORT).show();
 

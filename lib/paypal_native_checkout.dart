@@ -1,6 +1,7 @@
 // ignore_for_file: unused_field
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -42,9 +43,6 @@ class PaypalNativeCheckout {
     _callback = callback;
   }
 
-  ///initiate the package
-  ///app_id is you application id e.g
-  ///com.example.myapp
   Future<PaypalNativeCheckout> init({
     //the return url. This is probably your appid://paypalpay
     required String returnUrl,
@@ -80,7 +78,7 @@ class PaypalNativeCheckout {
   ///starts an order of payment
   ///@throws Exception if init()
   ///was not called before this function
-  Future<void> makeOrder({
+  Future<String> makeOrder({
     required String orderId,
   }) async {
     if (!_initiated) {
@@ -93,7 +91,9 @@ class PaypalNativeCheckout {
       "orderId": orderId,
     };
 
-    await _methodChannel.invokeMethod<String>('FlutterPaypal#makeOrder', data);
+    final result = await _methodChannel.invokeMethod<String>('FlutterPaypal#makeOrder', data);
+    log('makeOrder: $result');
+    return result ?? "";
   }
 
   // Private function that gets called by ObjC/Java

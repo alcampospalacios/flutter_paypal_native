@@ -4,8 +4,20 @@ import com.paypal.android.corepayments.PayPalSDKError;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult;
 
+import io.flutter.plugin.common.MethodChannel.Result;
+
+import androidx.annotation.NonNull;
+import com.google.gson.Gson;
+
+
 
 public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
+    private Result result;
+
+    // Call this method to init the instance of result that communicates with flutter channel
+    public void setResult(@NonNull Result result) {
+        this.result = result;
+    }
 
     @Override
     public void onPayPalCheckoutCanceled() {
@@ -26,7 +38,14 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
 
     @Override
     public void onPayPalCheckoutSuccess(PayPalNativeCheckoutResult payPalNativeCheckoutResult) {
-        // TODO: Implementation
+        // Convert the result to JSON
+        String jsonResult = convertToJson(payPalNativeCheckoutResult);
+        this.result.success(jsonResult);
+    }
 
+    private String convertToJson(PayPalNativeCheckoutResult result) {
+        Gson gson = new Gson();
+        String json = gson.toJson(result);
+        return json;
     }
 }
