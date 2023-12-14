@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.util.HashMap;
+import androidx.annotation.NonNull;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodChannel;
@@ -21,6 +22,11 @@ public abstract class FlutterRegistrarResponder {
     BinaryMessenger messenger;
 
     public static String LOG_TAG = "paypal_native_checkout";
+
+
+    public void setChannel(@NonNull MethodChannel channel) {
+        this.channel = channel;
+    }
 
     /**
      * MethodChannel class is home to success() method used by Result class

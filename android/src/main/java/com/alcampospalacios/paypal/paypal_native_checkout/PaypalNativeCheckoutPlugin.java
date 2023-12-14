@@ -42,7 +42,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
-  private MethodChannel channel;
+//  private MethodChannel channel;
 
   
 // val config = CoreConfig("CLIENT_ID", environment = Environment.SANDBOX)
@@ -57,13 +57,14 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
     PayPalNativeCheckoutClient payPalNativeClient;
 
     // Creating a instance of listener to receive callback fron the listener client
-    PayPalNativeCallBackHelper payPalNativeCallBackHelper = new PayPalNativeCallBackHelper();
+    PayPalNativeCallBackHelper payPalNativeCallBackHelper;
 
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "paypal_native_checkout");
     channel.setMethodCallHandler(this);
+    setChannel(channel);
   }
 
   @Override
@@ -88,6 +89,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
   // I need study on android what does mean this
   @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+
         application = binding.getActivity().getApplication();
         initialisePaypalConfig();
     }
@@ -145,10 +147,11 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
 //        final PayPalCallBackHelper payPalCallBackHelper = new PayPalCallBackHelper(this);
 
-
+        payPalNativeCallBackHelper = new PayPalNativeCallBackHelper(this);
 
         // Setting the client with our listener
         payPalNativeClient.setListener(payPalNativeCallBackHelper);
+
 
 
 
@@ -181,10 +184,12 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
         String orderId = call.argument("orderId");
 
+
         try {
             final PayPalNativeCheckoutRequest request = new PayPalNativeCheckoutRequest(orderId, null);
             payPalNativeClient.startCheckout(request);
             payPalNativeCallBackHelper.setResult(result);
+
         } catch (Exception e) {
             Toast.makeText(application, "error occurred while the checkout is processing", Toast.LENGTH_SHORT).show();
 

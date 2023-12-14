@@ -111,6 +111,7 @@ class PaypalNativeCheckout {
   }
 
   void _onPayPalOrderSuccess(Map<String, dynamic> data) {
+    log('approvalData is here');
     String aData = data['approvalData'] ?? "";
     FPayPalApprovalData success = FPayPalApprovalData();
 
@@ -118,7 +119,9 @@ class PaypalNativeCheckout {
       success = FPayPalApprovalData.fromJson(
         jsonDecode(aData),
       );
+      log('approvalData ${success.toString()}');
     } catch (e) {
+      log('approvalDataError ${e.toString()}');
       if (isDebugMode) debugPrint(e.toString());
     }
     _callback.onSuccess(success);
