@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder;
 
 import android.util.Log;
 
-
+import org.jetbrains.annotations.NotNull;
 
 
 public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
@@ -81,5 +81,19 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
         Gson gson = new Gson();
         String json = gson.toJson(result);
         return json;
+    }
+
+    public void firedOnCapturedCallBack(@NotNull Result result) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("onCapture", "fired");
+        if (flutterPaypalPlugin != null) {
+            flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCapture", data);
+//            result.success("completed");
+            Log.e("firedOnCapturedCallBack", "all is ok");
+
+        } else {
+            Log.e("PayPalNativeCallBackHelper", "flutterPaypalPlugin is null");
+        }
+
     }
 }

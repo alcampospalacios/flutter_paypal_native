@@ -26,6 +26,7 @@ class PaypalNativeCheckout {
     onSuccess: (_) {},
     onError: (_) {},
     onShippingChange: (_) {},
+    onCapturedMoney: () {},
   );
 
   static bool isDebugMode = false;
@@ -92,7 +93,6 @@ class PaypalNativeCheckout {
     };
 
     final result = await _methodChannel.invokeMethod<String>('FlutterPaypal#makeOrder', data);
-    log('makeOrder: $result');
     return result ?? "";
   }
 
@@ -107,11 +107,12 @@ class PaypalNativeCheckout {
       _onPayPalOrderError(call.arguments.cast<String, dynamic>());
     } else if (call.method == 'FlutterPaypal#onShippingChange') {
       _onPayPalOrderShippingChange(call.arguments.cast<String, dynamic>());
+    } else if (call.method == 'FlutterPaypal#onCapture') {
+      _onPayPalOrderCaptured();
     }
   }
 
-  void _onPayPalOrderSuccess(Map<String, dynamic> data) {
-    log('approvalData is here');
+  Future<void> _onPayPalOrderSuccess(Map<String, dynamic> data) async {
     String aData = data['approvalData'] ?? "";
     FPayPalApprovalData success = FPayPalApprovalData();
 
@@ -119,9 +120,14 @@ class PaypalNativeCheckout {
       success = FPayPalApprovalData.fromJson(
         jsonDecode(aData),
       );
+
+      Map<String, String> data = {
+        "orderId": success.orderId ?? "",
+      };
+
       log('approvalData ${success.toString()}');
+      await _methodChannel.invokeMethod<String>('FlutterPaypal#captureMoney', data);
     } catch (e) {
-      log('approvalDataError ${e.toString()}');
       if (isDebugMode) debugPrint(e.toString());
     }
     _callback.onSuccess(success);
@@ -156,6 +162,13 @@ class PaypalNativeCheckout {
 
     if (_callback.onShippingChange != null) {
       _callback.onShippingChange!(shipping);
+    }
+  }
+
+  void _onPayPalOrderCaptured() {
+    log('Order captured successfully');
+    if (_callback.onCapturedMoney != null) {
+      _callback.onCapturedMoney!();
     }
   }
 

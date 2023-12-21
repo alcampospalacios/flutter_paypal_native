@@ -1,5 +1,6 @@
 package com.alcampospalacios.paypal.paypal_native_checkout;
 
+
 import androidx.annotation.NonNull;
 
 
@@ -9,10 +10,20 @@ import android.app.Application;
 import android.util.Log;
 import android.widget.Toast;
 
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 
-
-
+import com.alcampospalacios.paypal.paypal_native_checkout.models.ErrorInterceptor;
+import com.google.gson.Gson;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest;
 import com.paypal.android.corepayments.CoreConfig;
@@ -21,9 +32,12 @@ import com.paypal.android.corepayments.Environment;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.PayPalNativeCallBackHelper;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.CheckoutConfigStore;
 import com.alcampospalacios.paypal.paypal_native_checkout.models.EnvironmentHelper;
-//import com.alcampospalacios.paypal.paypal_native_checkout.models.PayPalCallBackHelper;
+import com.alcampospalacios.paypal.paypal_native_checkout.ICaptureOrderApi;
 
 
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,7 +91,9 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         } else if (call.method.equals("FlutterPaypal#makeOrder")) {
             makeOrder(call, result);
             return;
-        }
+        } else if (call.method.equals("FlutterPaypal#captureMoney")) {
+            captureMoney(call, result);
+    }
         result.notImplemented();
   }
 
@@ -178,22 +194,98 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
     }
 
     private void makeOrder(@NonNull MethodCall call, @NonNull Result result) {
+        String orderId = call.argument("orderId");
+
         if (!initialisedPaypalConfig) {
             initialisePaypalConfig();
         }
-
-        String orderId = call.argument("orderId");
-
 
         try {
             final PayPalNativeCheckoutRequest request = new PayPalNativeCheckoutRequest(orderId, null);
             payPalNativeClient.startCheckout(request);
             payPalNativeCallBackHelper.setResult(result);
-
         } catch (Exception e) {
             Toast.makeText(application, "error occurred while the checkout is processing", Toast.LENGTH_SHORT).show();
-
             result.error("completed", e.getMessage(), e.getMessage());
         }
     }
+
+    private void captureMoney(@NonNull MethodCall call, @NonNull Result result) {
+        String orderId = call.argument("orderId");
+        String url;
+        if (checkoutConfigStore.payPalEnvironment == Environment.SANDBOX) {
+            url = "https://api-m.sandbox.paypal.com";
+        } else {
+            url = "https://api.paypal.com";
+        }
+
+        // Intance to log the url and data retrofit
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+//        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+        // Adding token to request
+        // Adding token to request
+        String authToken = "A21AAKaKiOonVMOry0H8WHXB1V02cROsvUkRqbgnnLt9X-KMr90wNArP1UOSsQNA0n_8nhjCHovorIu2O4kqWcpnU3iLNhASQ";
+        String paypal_request_id = "819980cc-cc7e-4800-81dd-0901f1961101";
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(Chain chain) throws IOException {
+                        Request original = chain.request();
+                        Request.Builder requestBuilder = original.newBuilder()
+                                .header("Authorization", "Bearer " + authToken)
+                                .header("PayPal-Request-Id",  paypal_request_id)
+                                .header("Content-Type", "application/json")
+                                .method(original.method(), original.body());
+                        Request request = requestBuilder.build();
+                        return chain.proceed(request);
+                    }
+                })
+                .addInterceptor(interceptor)
+                .build();
+        
+     
+
+    
+
+        // Build retrofit instance
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(url)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        // Building and instance of interface api
+        ICaptureOrderApi apiService = retrofit.create(ICaptureOrderApi.class);
+
+
+
+
+        // Doing the request to capture the money
+        Call<Void> retrofitCall = apiService.captureOrder(orderId);
+
+        retrofitCall.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                   if(response.isSuccessful() ) {
+                       payPalNativeCallBackHelper.firedOnCapturedCallBack(result);
+                   } else {
+                       Gson gson = new Gson();
+                       ErrorInterceptor message=gson.fromJson(response.errorBody().charStream(),ErrorInterceptor.class);
+                       Log.d("onResponse", message.getMessage());
+                   }
+
+
+
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Log.d("onFailure",t.getMessage());
+//                    result.error("error", t.getMessage(), t.getMessage());
+                }
+            });
+        }
+
 }
