@@ -21,9 +21,11 @@ import org.jetbrains.annotations.NotNull;
 public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
     private Result result;
     private PaypalNativeCheckoutPlugin flutterPaypalPlugin;
+    private CheckoutConfigStore checkoutConfigStore;
 
-    public PayPalNativeCallBackHelper(PaypalNativeCheckoutPlugin flutterPaypalPlugin) {
+    public PayPalNativeCallBackHelper(PaypalNativeCheckoutPlugin flutterPaypalPlugin, CheckoutConfigStore checkoutConfigStore) {
         this.flutterPaypalPlugin = flutterPaypalPlugin;
+        this.checkoutConfigStore = checkoutConfigStore;
     }
 
     // Call this method to init the instance of result that communicates with flutter channel
@@ -55,45 +57,32 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
 
     @Override
     public void onPayPalCheckoutSuccess(PayPalNativeCheckoutResult payPalNativeCheckoutResult) {
-        // Convert the result to JSON
-//        String jsonResult = convertToJson(payPalNativeCheckoutResult);
-//        this.result.success(jsonResult);
-        Log.d("onPayPalCheckoutSuccessNative", "onPayPalCheckoutSuccessNative");
         HashMap<String, Object> data = new HashMap<>();
-
         Gson gson = (new GsonBuilder()).create();
-        Log.d("onPayPalCheckoutSuccessNative after GsonBuilder", "GsonBuilder");
         String json = gson.toJson(PPApprovalData.fromPayPalObject(payPalNativeCheckoutResult));
         data.put("approvalData", json);
 
-        Log.d("onPayPalCheckoutSuccessNative before invoke", "invoke");
-        if (flutterPaypalPlugin != null) {
-            flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onSuccess", data);
-        } else {
-            Log.e("PayPalNativeCallBackHelper", "flutterPaypalPlugin is null");
+        // Invoking new method on success
+        flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onSuccess", data);
+
+        // Checking if auto capture from client is not active them finished the process with the result.success
+        // if is active them the process continue to make the capture from money and result.success is not sent yet
+        if (!checkoutConfigStore.autoCaptureFromClient) {
+            this.result.success("completed");
         }
-
-        Log.d("onPayPalCheckoutSuccessNative after invoke", "after invoke");
-        this.result.success("completed");
     }
 
-    private String convertToJson(PayPalNativeCheckoutResult result) {
-        Gson gson = new Gson();
-        String json = gson.toJson(result);
-        return json;
-    }
 
+    // This method is fired in the capture callback from the money
     public void firedOnCapturedCallBack(@NotNull Result result) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("onCapture", "fired");
-        if (flutterPaypalPlugin != null) {
-            flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCapture", data);
-//            result.success("completed");
-            Log.e("firedOnCapturedCallBack", "all is ok");
 
-        } else {
-            Log.e("PayPalNativeCallBackHelper", "flutterPaypalPlugin is null");
-        }
+        // Invoking method called after
+        flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCapture", data);
+        result.success("completed");
+
+
 
     }
 }

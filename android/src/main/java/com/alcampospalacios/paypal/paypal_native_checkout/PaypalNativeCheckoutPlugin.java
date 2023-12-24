@@ -126,19 +126,21 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
     private void initiatePackage(@NonNull MethodCall call, @NonNull Result result) {
         String returnUrl = call.argument("returnUrl");
         String clientId = call.argument("clientId");
+        Boolean autoCaptureFromClient = call.argument("autoCaptureFromClient");
+        String accessToken = call.argument("accessToken");
         String payPalEnvironmentStr = call.argument("payPalEnvironment");
+        String paypalRequestId = call.argument("paypalRequestId");
 
         Environment payPalEnvironment = (new EnvironmentHelper()).getEnumFromString(payPalEnvironmentStr);
 
-        Log.d("initiatePackage", returnUrl);
-        Log.d("initiatePackage", clientId);
-        Log.d("initiatePackage", payPalEnvironmentStr);
-
-        // store in checkoutconfigstore because application is sometimes null
+        // store data in global config
         checkoutConfigStore = new CheckoutConfigStore(
                 clientId,
                 payPalEnvironment,
-                returnUrl
+                returnUrl,
+                autoCaptureFromClient,
+                accessToken,
+                paypalRequestId
                );
         result.success("completed");
     }
@@ -149,9 +151,6 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         if (checkoutConfigStore == null)
             return;
 
-        Log.d("initialisePaypalConfig", "ok");
-
-
         // Getting the new payPalNativeClient instance
         CoreConfig coreConfig = new CoreConfig(checkoutConfigStore.clientId, checkoutConfigStore.payPalEnvironment);
         payPalNativeClient = new PayPalNativeCheckoutClient(
@@ -160,36 +159,11 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
                 checkoutConfigStore.returnUrl
         );
 
-
-//        final PayPalCallBackHelper payPalCallBackHelper = new PayPalCallBackHelper(this);
-
-        payPalNativeCallBackHelper = new PayPalNativeCallBackHelper(this);
-
-        // Setting the client with our listener
+        // Setting the client with listener to get the callback
+        payPalNativeCallBackHelper = new PayPalNativeCallBackHelper(this, checkoutConfigStore);
         payPalNativeClient.setListener(payPalNativeCallBackHelper);
 
-
-
-
-
-
-//        PayPalCheckout.registerCallbacks(
-//                approval -> {
-//                    // Order successfully captured
-//                    payPalCallBackHelper.onPayPalApprove(approval);
-//                },
-//                (shippingData, shippingAction) -> {
-//                    // called when shippinginfo changes
-//                    payPalCallBackHelper.onPayPalShippingChange(shippingData, shippingAction);
-//                },
-//                () -> {
-//                    // Optional callback for when a buyer cancels the paysheet
-//                    payPalCallBackHelper.onPayPalCancel();
-//                },
-//                errorInfo -> {
-//                    // Optional error callback
-//                    payPalCallBackHelper.onPayPalError(errorInfo);
-//                });
+        // To check if is initialized
         initialisedPaypalConfig = true;
     }
 
@@ -212,6 +186,10 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
     private void captureMoney(@NonNull MethodCall call, @NonNull Result result) {
         String orderId = call.argument("orderId");
+
+        String accessToken = checkoutConfigStore.accessToken;
+        String paypalRequestId = checkoutConfigStore.paypalRequestId;
+
         String url;
         if (checkoutConfigStore.payPalEnvironment == Environment.SANDBOX) {
             url = "https://api-m.sandbox.paypal.com";
@@ -219,23 +197,19 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
             url = "https://api.paypal.com";
         }
 
-        // Intance to log the url and data retrofit
+        // Instance to log the url and data retrofit
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
-//        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        // Adding token to request
-        // Adding token to request
-        String authToken = "A21AAKaKiOonVMOry0H8WHXB1V02cROsvUkRqbgnnLt9X-KMr90wNArP1UOSsQNA0n_8nhjCHovorIu2O4kqWcpnU3iLNhASQ";
-        String paypal_request_id = "819980cc-cc7e-4800-81dd-0901f1961101";
+        // Modify request to add headers and see logs
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new Interceptor() {
                     @Override
                     public okhttp3.Response intercept(Chain chain) throws IOException {
                         Request original = chain.request();
                         Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", "Bearer " + authToken)
-                                .header("PayPal-Request-Id",  paypal_request_id)
+                                .header("Authorization", "Bearer " + accessToken)
+                                .header("PayPal-Request-Id",  paypalRequestId)
                                 .header("Content-Type", "application/json")
                                 .method(original.method(), original.body());
                         Request request = requestBuilder.build();
@@ -244,23 +218,16 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
                 })
                 .addInterceptor(interceptor)
                 .build();
-        
-     
 
-    
-
-        // Build retrofit instance
+        // Building retrofit instance
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        // Building and instance of interface api
+        // Building and instance of interface api to make the capture
         ICaptureOrderApi apiService = retrofit.create(ICaptureOrderApi.class);
-
-
-
 
         // Doing the request to capture the money
         Call<Void> retrofitCall = apiService.captureOrder(orderId);
