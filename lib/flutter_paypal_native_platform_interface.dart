@@ -1,6 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'paypal_native_checkout_method_channel.dart';
+import 'flutter_paypal_native_method_channel.dart';
 
 abstract class PaypalNativeCheckoutPlatform extends PlatformInterface {
   /// Constructs a PaypalNativeCheckoutPlatform.

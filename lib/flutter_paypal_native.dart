@@ -9,7 +9,7 @@ import 'models/approval/approval_data.dart';
 import 'models/custom/environment.dart';
 import 'models/custom/error_info.dart';
 import 'models/custom/order_callback.dart';
-import 'paypal_native_checkout_platform_interface.dart';
+import 'flutter_paypal_native_platform_interface.dart';
 
 class FlutterPaypalNative {
   static FlutterPaypalNative? _instance;

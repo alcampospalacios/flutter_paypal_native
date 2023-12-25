@@ -1,12 +1,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypal_native_checkout/paypal_native_checkout_method_channel.dart';
+import 'package:paypal_native_checkout/flutter_paypal_native_method_channel.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   MethodChannelPaypalNativeCheckout platform = MethodChannelPaypalNativeCheckout();
-  const MethodChannel channel = MethodChannel('paypal_native_checkout');
+  const MethodChannel channel = MethodChannel('flutter_paypal_native');
 
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(

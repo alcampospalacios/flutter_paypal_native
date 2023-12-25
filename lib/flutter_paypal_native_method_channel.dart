@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'paypal_native_checkout_platform_interface.dart';
+import 'flutter_paypal_native_platform_interface.dart';
 
 /// An implementation of [PaypalNativeCheckoutPlatform] that uses method channels.
 class MethodChannelPaypalNativeCheckout extends PaypalNativeCheckoutPlatform {
