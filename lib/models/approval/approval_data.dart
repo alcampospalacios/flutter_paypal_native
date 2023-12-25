@@ -1,3 +1,7 @@
+/// This class contains values of response in case of the order is approved succefully
+///
+/// * [payerId] This parameter represent the payerId return from paypal native sdk `PayPalNativeCheckoutResult` after the order is approved
+/// * [orderId] This parameter repesent the orderId return from paypal native sdk `PayPalNativeCheckoutResult` after the order is approved
 class FPayPalApprovalData {
   String? payerId;
   String? orderId;

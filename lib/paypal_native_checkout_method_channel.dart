@@ -7,7 +7,7 @@ import 'paypal_native_checkout_platform_interface.dart';
 class MethodChannelPaypalNativeCheckout extends PaypalNativeCheckoutPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('paypal_native_checkout');
+  final methodChannel = const MethodChannel('flutter_paypal_native');
 
   @override
   Future<String?> getPlatformVersion() async {

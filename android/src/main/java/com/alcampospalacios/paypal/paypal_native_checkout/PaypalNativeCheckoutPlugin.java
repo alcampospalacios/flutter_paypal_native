@@ -76,7 +76,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "paypal_native_checkout");
+    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutter_paypal_native");
     channel.setMethodCallHandler(this);
     setChannel(channel);
   }
@@ -181,6 +181,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         } catch (Exception e) {
             Toast.makeText(application, "error occurred while the checkout is processing", Toast.LENGTH_SHORT).show();
             result.error("completed", e.getMessage(), e.getMessage());
+            
         }
     }
 

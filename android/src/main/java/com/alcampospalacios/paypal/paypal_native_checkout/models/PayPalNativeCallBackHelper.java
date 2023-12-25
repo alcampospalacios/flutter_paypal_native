@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import com.google.gson.GsonBuilder;
 
+import android.os.Build;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +41,24 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
 
     @Override
     public void onPayPalCheckoutCanceled() {
-        // TODO: Implementation
+        // Invoking new function on cancel
+        flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCancel", null);
+
+        this.result.error("completed");
     }
 
     @Override
     public void onPayPalCheckoutFailure(PayPalSDKError payPalSDKError) {
-        // TODO: Implementation
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("code", String.valueOf(payPalSDKError.getCode()) );
+        data.put("error", payPalSDKError.getMessage());
+        data.put("errorDescription", payPalSDKError.getErrorDescription());
+
+        // Invoking new function on error
+        flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onError", data);
+
+        this.result.error("completed");
+
 
     }
 
@@ -62,7 +75,7 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
         String json = gson.toJson(PPApprovalData.fromPayPalObject(payPalNativeCheckoutResult));
         data.put("approvalData", json);
 
-        // Invoking new method on success
+        // Invoking new function on success
         flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onSuccess", data);
 
         // Checking if auto capture from client is not active them finished the process with the result.success
@@ -85,4 +98,5 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
 
 
     }
+
 }
