@@ -1,4 +1,4 @@
-package com.alcampospalacios.paypal.paypal_native_checkout.models;
+package com.alcampospalacios.paypal.flutter_paypal_native.models;
 
 import com.paypal.android.corepayments.Environment;
 

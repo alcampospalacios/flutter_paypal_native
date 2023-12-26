@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypal_native_checkout/flutter_paypal_native_method_channel.dart';
+import 'package:flutter_paypal_native/flutter_paypal_native_method_channel.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

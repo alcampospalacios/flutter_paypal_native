@@ -1,6 +1,5 @@
-package com.alcampospalacios.paypal.paypal_native_checkout;
+package com.alcampospalacios.paypal.flutter_paypal_native;
 import retrofit2.Call;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 

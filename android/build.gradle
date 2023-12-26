@@ -1,4 +1,4 @@
-group 'com.alcampospalacios.paypal.paypal_native_checkout'
+group 'com.alcampospalacios.paypal.flutter_paypal_native'
 version '1.0'
 
 buildscript {
@@ -24,13 +24,6 @@ rootProject.allprojects {
             }
         }
         mavenCentral()
-        mavenCentral()
-        mavenCentral()
-        mavenCentral()
-        mavenCentral()
-        mavenCentral()
-        mavenCentral()
-        mavenCentral()
     }
 }
 
@@ -38,7 +31,7 @@ apply plugin: 'com.android.library'
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.alcampospalacios.paypal.paypal_native_checkout'
+        namespace 'com.alcampospalacios.paypal.flutter_paypal_native'
     }
 
     compileSdkVersion 33

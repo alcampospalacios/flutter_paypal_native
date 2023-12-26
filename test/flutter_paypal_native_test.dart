@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:paypal_native_checkout/flutter_paypal_native.dart';
-import 'package:paypal_native_checkout/flutter_paypal_native_platform_interface.dart';
-import 'package:paypal_native_checkout/flutter_paypal_native_method_channel.dart';
+import 'package:flutter_paypal_native/flutter_paypal_native.dart';
+import 'package:flutter_paypal_native/flutter_paypal_native_platform_interface.dart';
+import 'package:flutter_paypal_native/flutter_paypal_native_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockPaypalNativeCheckoutPlatform with MockPlatformInterfaceMixin implements PaypalNativeCheckoutPlatform {

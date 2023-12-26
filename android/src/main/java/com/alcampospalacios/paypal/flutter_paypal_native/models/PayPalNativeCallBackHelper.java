@@ -1,7 +1,8 @@
-package com.alcampospalacios.paypal.paypal_native_checkout.models;
+package com.alcampospalacios.paypal.flutter_paypal_native.models;
 
-import com.alcampospalacios.paypal.paypal_native_checkout.PaypalNativeCheckoutPlugin;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.approvaldata.PPApprovalData;
+import com.alcampospalacios.paypal.flutter_paypal_native.PaypalNativePlugin;
+import com.alcampospalacios.paypal.flutter_paypal_native.models.approvaldata.PPApprovalData;
+import com.alcampospalacios.paypal.flutter_paypal_native.models.CheckoutConfigStore;
 import com.paypal.android.corepayments.PayPalSDKError;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult;
@@ -21,10 +22,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
     private Result result;
-    private PaypalNativeCheckoutPlugin flutterPaypalPlugin;
+    private PaypalNativePlugin flutterPaypalPlugin;
     private CheckoutConfigStore checkoutConfigStore;
 
-    public PayPalNativeCallBackHelper(PaypalNativeCheckoutPlugin flutterPaypalPlugin, CheckoutConfigStore checkoutConfigStore) {
+    public PayPalNativeCallBackHelper(PaypalNativePlugin flutterPaypalPlugin, CheckoutConfigStore checkoutConfigStore) {
         this.flutterPaypalPlugin = flutterPaypalPlugin;
         this.checkoutConfigStore = checkoutConfigStore;
     }
@@ -35,7 +36,7 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
     }
 
     // Call this method to init the instance of flutterPaypalPlugin
-    public void setFlutterPaypalPlugin(@NonNull PaypalNativeCheckoutPlugin flutterPaypalPlugin) {
+    public void setFlutterPaypalPlugin(@NonNull PaypalNativePlugin flutterPaypalPlugin) {
         this.flutterPaypalPlugin = flutterPaypalPlugin;
     }
 
@@ -44,7 +45,7 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
         // Invoking new function on cancel
         flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCancel", null);
 
-        this.result.error("completed");
+        this.result.success("completed");;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
         // Invoking new function on error
         flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onError", data);
 
-        this.result.error("completed");
+        this.result.error("completed", payPalSDKError.getMessage(), payPalSDKError.getMessage());;
 
 
     }

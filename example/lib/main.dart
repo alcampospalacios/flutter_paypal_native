@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:paypal_native_checkout/paypal_native_checkout.dart';
+import 'package:flutter_paypal_native/flutter_paypal_native.dart';
 
 void main() {
   runApp(const MyApp());

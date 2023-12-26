@@ -1,4 +1,4 @@
-package com.alcampospalacios.paypal.paypal_native_checkout;
+package com.alcampospalacios.paypal.flutter_paypal_native;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -18,7 +18,7 @@ import org.junit.Test;
 public class PaypalNativeCheckoutPluginTest {
   @Test
   public void onMethodCall_getPlatformVersion_returnsExpectedValue() {
-    PaypalNativeCheckoutPlugin plugin = new PaypalNativeCheckoutPlugin();
+    PaypalNativePlugin plugin = new PaypalNativePlugin();
 
     final MethodCall call = new MethodCall("getPlatformVersion", null);
     MethodChannel.Result mockResult = mock(MethodChannel.Result.class);

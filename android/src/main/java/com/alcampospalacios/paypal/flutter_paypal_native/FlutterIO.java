@@ -1,4 +1,4 @@
-package com.alcampospalacios.paypal.paypal_native_checkout;
+package com.alcampospalacios.paypal.flutter_paypal_native;
 
 import android.content.Context;
 import android.os.Handler;
@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodChannel;
 
-public abstract class FlutterRegistrarResponder {
+public abstract class FlutterIO {
     Context context;/// The MethodChannel that will the communication between Flutter and native
                     /// Android
     ///
@@ -21,7 +21,7 @@ public abstract class FlutterRegistrarResponder {
     MethodChannel channel;
     BinaryMessenger messenger;
 
-    public static String LOG_TAG = "paypal_native_checkout";
+    public static String LOG_TAG = "flutter_paypal_native";
 
 
     public void setChannel(@NonNull MethodChannel channel) {
@@ -50,7 +50,7 @@ public abstract class FlutterRegistrarResponder {
      * This will communicate error back to Dart
      */
     void replyError(final MethodChannel.Result reply, final String message, final Object response) {
-        final String tag = "paypal_native_checkout";
+        final String tag = "flutter_paypal_native";
         runOnMainThread(new Runnable() {
             @Override
             public void run() {

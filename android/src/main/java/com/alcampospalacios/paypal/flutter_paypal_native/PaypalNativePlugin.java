@@ -1,10 +1,7 @@
-package com.alcampospalacios.paypal.paypal_native_checkout;
+package com.alcampospalacios.paypal.flutter_paypal_native;
 
 
 import androidx.annotation.NonNull;
-
-
-
 
 import android.app.Application;
 import android.util.Log;
@@ -20,23 +17,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-
-
-import com.alcampospalacios.paypal.paypal_native_checkout.models.ErrorInterceptor;
 import com.google.gson.Gson;
+
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient;
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest;
 import com.paypal.android.corepayments.CoreConfig;
 import com.paypal.android.corepayments.Environment;
 
-import com.alcampospalacios.paypal.paypal_native_checkout.models.PayPalNativeCallBackHelper;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.CheckoutConfigStore;
-import com.alcampospalacios.paypal.paypal_native_checkout.models.EnvironmentHelper;
-import com.alcampospalacios.paypal.paypal_native_checkout.ICaptureOrderApi;
+import com.alcampospalacios.paypal.flutter_paypal_native.models.PayPalNativeCallBackHelper;
+import com.alcampospalacios.paypal.flutter_paypal_native.models.CheckoutConfigStore;
+import com.alcampospalacios.paypal.flutter_paypal_native.models.EnvironmentHelper;
+import com.alcampospalacios.paypal.flutter_paypal_native.ICaptureOrderApi;
+import com.alcampospalacios.paypal.flutter_paypal_native.models.ErrorInterceptor;
 
 
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +44,8 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
-/** PaypalNativeCheckoutPlugin */
-public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
+/** PaypalNativePlugin */
+public class PaypalNativePlugin extends FlutterIO
  implements FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
@@ -181,7 +176,7 @@ public class PaypalNativeCheckoutPlugin extends FlutterRegistrarResponder
         } catch (Exception e) {
             Toast.makeText(application, "error occurred while the checkout is processing", Toast.LENGTH_SHORT).show();
             result.error("completed", e.getMessage(), e.getMessage());
-            
+
         }
     }
 
