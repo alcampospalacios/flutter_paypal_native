@@ -81,6 +81,7 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
 
         // Checking if auto capture from client is not active them finished the process with the result.success
         // if is active them the process continue to make the capture from money and result.success is not sent yet
+        Log.d("autoCaptureFromClient", checkoutConfigStore.autoCaptureFromClient? "true": "false");
         if (!checkoutConfigStore.autoCaptureFromClient) {
             this.result.success("completed");
         }
@@ -88,13 +89,13 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
 
 
     // This method is fired in the capture callback from the money
-    public void firedOnCapturedCallBack(@NotNull Result result) {
+    public void firedOnCapturedCallBack() {
         HashMap<String, Object> data = new HashMap<>();
         data.put("onCapture", "fired");
 
         // Invoking method called after
         flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCapture", data);
-        result.success("completed");
+        this.result.success("completed");
 
 
 

@@ -9,25 +9,22 @@ public class CheckoutConfigStore {
     public Environment payPalEnvironment ;
     public String returnUrl;
     public Boolean autoCaptureFromClient;
-    public String accessToken;
-    public String paypalRequestId;
+
 
 
     public CheckoutConfigStore(
             String clientId,
             Environment payPalEnvironment,
             String returnUrl,
-            Boolean autoCaptureFromClient,
-            String accessToken,
-            String paypalRequestId
+            Boolean autoCaptureFromClient
+
 
     ) {
         this.payPalEnvironment = payPalEnvironment;
         this.clientId = clientId;
         this.returnUrl = returnUrl;
         this.autoCaptureFromClient = autoCaptureFromClient;
-        this.accessToken = accessToken;
-        this.paypalRequestId = paypalRequestId;
+
     }
 
 

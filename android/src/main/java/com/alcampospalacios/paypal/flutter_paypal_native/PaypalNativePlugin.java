@@ -3,7 +3,9 @@ package com.alcampospalacios.paypal.flutter_paypal_native;
 
 import androidx.annotation.NonNull;
 
+import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -17,6 +19,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+
+import com.alcampospalacios.paypal.flutter_paypal_native.models.CaptureOrderConfigStore;
+import com.alcampospalacios.paypal_dialog.BottomSheetLibrary;
+import com.alcampospalacios.paypal_dialog.models.PaypalOrder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient;
@@ -27,10 +35,10 @@ import com.paypal.android.corepayments.Environment;
 import com.alcampospalacios.paypal.flutter_paypal_native.models.PayPalNativeCallBackHelper;
 import com.alcampospalacios.paypal.flutter_paypal_native.models.CheckoutConfigStore;
 import com.alcampospalacios.paypal.flutter_paypal_native.models.EnvironmentHelper;
-import com.alcampospalacios.paypal.flutter_paypal_native.ICaptureOrderApi;
-import com.alcampospalacios.paypal.flutter_paypal_native.models.ErrorInterceptor;
 
 
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,13 +68,18 @@ public class PaypalNativePlugin extends FlutterIO
 
     private Application application;
     private CheckoutConfigStore checkoutConfigStore;
+    private CaptureOrderConfigStore  captureOrderConfigStore;
 //    private PayPalCallBackHelper payPalCallBackHelper;
     boolean initialisedPaypalConfig = false;
 
     PayPalNativeCheckoutClient payPalNativeClient;
 
-    // Creating a instance of listener to receive callback fron the listener client
+    // Creating a instance of listener to receive callback from the listener client and dialog confirmation payment
     PayPalNativeCallBackHelper payPalNativeCallBackHelper;
+    PayPalCallBackDialogHelper payPalCallBackDialogHelper;
+
+    private Context _context;
+    private Activity _activity;
 
 
   @Override
@@ -87,7 +100,7 @@ public class PaypalNativePlugin extends FlutterIO
             makeOrder(call, result);
             return;
         } else if (call.method.equals("FlutterPaypal#captureMoney")) {
-            captureMoney(call, result);
+            captureMoney(call, result, application.getApplicationContext());
     }
         result.notImplemented();
   }
@@ -102,6 +115,7 @@ public class PaypalNativePlugin extends FlutterIO
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
 
         application = binding.getActivity().getApplication();
+      _activity = binding.getActivity();
         initialisePaypalConfig();
     }
 
@@ -122,9 +136,7 @@ public class PaypalNativePlugin extends FlutterIO
         String returnUrl = call.argument("returnUrl");
         String clientId = call.argument("clientId");
         Boolean autoCaptureFromClient = call.argument("autoCaptureFromClient");
-        String accessToken = call.argument("accessToken");
         String payPalEnvironmentStr = call.argument("payPalEnvironment");
-        String paypalRequestId = call.argument("paypalRequestId");
 
         Environment payPalEnvironment = (new EnvironmentHelper()).getEnumFromString(payPalEnvironmentStr);
 
@@ -133,9 +145,7 @@ public class PaypalNativePlugin extends FlutterIO
                 clientId,
                 payPalEnvironment,
                 returnUrl,
-                autoCaptureFromClient,
-                accessToken,
-                paypalRequestId
+                autoCaptureFromClient
                );
         result.success("completed");
     }
@@ -156,6 +166,7 @@ public class PaypalNativePlugin extends FlutterIO
 
         // Setting the client with listener to get the callback
         payPalNativeCallBackHelper = new PayPalNativeCallBackHelper(this, checkoutConfigStore);
+        payPalCallBackDialogHelper = new PayPalCallBackDialogHelper(this);
         payPalNativeClient.setListener(payPalNativeCallBackHelper);
 
         // To check if is initialized
@@ -164,6 +175,11 @@ public class PaypalNativePlugin extends FlutterIO
 
     private void makeOrder(@NonNull MethodCall call, @NonNull Result result) {
         String orderId = call.argument("orderId");
+        String accessToken = call.argument("accessToken");
+        String paypalRequestId = call.argument("paypalRequestId");
+        String jsonData = call.argument("jsonData");
+
+        captureOrderConfigStore = new CaptureOrderConfigStore(accessToken, paypalRequestId, jsonData);
 
         if (!initialisedPaypalConfig) {
             initialisePaypalConfig();
@@ -180,11 +196,8 @@ public class PaypalNativePlugin extends FlutterIO
         }
     }
 
-    private void captureMoney(@NonNull MethodCall call, @NonNull Result result) {
+    private void captureMoney(@NonNull MethodCall call, @NonNull Result result, @NonNull Context context) {
         String orderId = call.argument("orderId");
-
-        String accessToken = checkoutConfigStore.accessToken;
-        String paypalRequestId = checkoutConfigStore.paypalRequestId;
 
         String url;
         if (checkoutConfigStore.payPalEnvironment == Environment.SANDBOX) {
@@ -193,62 +206,27 @@ public class PaypalNativePlugin extends FlutterIO
             url = "https://api.paypal.com";
         }
 
-        // Instance to log the url and data retrofit
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
+        PaypalOrder paypalOrder;
 
-        // Modify request to add headers and see logs
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(Chain chain) throws IOException {
-                        Request original = chain.request();
-                        Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", "Bearer " + accessToken)
-                                .header("PayPal-Request-Id",  paypalRequestId)
-                                .header("Content-Type", "application/json")
-                                .method(original.method(), original.body());
-                        Request request = requestBuilder.build();
-                        return chain.proceed(request);
-                    }
-                })
-                .addInterceptor(interceptor)
-                .build();
+        // Transforming from json data to PaypalOrderClass
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+             paypalOrder = objectMapper.readValue(captureOrderConfigStore.jsonData, PaypalOrder.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            paypalOrder = new PaypalOrder();
+        }
 
-        // Building retrofit instance
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(url)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        payPalCallBackDialogHelper.setResult(result);
 
-        // Building and instance of interface api to make the capture
-        ICaptureOrderApi apiService = retrofit.create(ICaptureOrderApi.class);
-
-        // Doing the request to capture the money
-        Call<Void> retrofitCall = apiService.captureOrder(orderId);
-
-        retrofitCall.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                   if(response.isSuccessful() ) {
-                       payPalNativeCallBackHelper.firedOnCapturedCallBack(result);
-                   } else {
-                       Gson gson = new Gson();
-                       ErrorInterceptor message=gson.fromJson(response.errorBody().charStream(),ErrorInterceptor.class);
-                       Log.d("onResponse", message.getMessage());
-                   }
-
-
-
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Log.d("onFailure",t.getMessage());
-//                    result.error("error", t.getMessage(), t.getMessage());
-                }
-            });
+        BottomSheetLibrary.showBottomSheet(
+                payPalCallBackDialogHelper,
+                _activity,
+                orderId,
+                paypalOrder,
+                captureOrderConfigStore.accessToken,
+                captureOrderConfigStore.paypalRequestId,
+                url);
         }
 
 }

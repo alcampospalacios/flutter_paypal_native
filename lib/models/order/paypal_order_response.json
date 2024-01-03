@@ -1,0 +1,58 @@
+{
+  "id": "0AX71814SK731420S",
+  "intent": "CAPTURE",
+  "status": "CREATED",
+  "purchase_units": [
+    {
+      "reference_id": "default",
+      "amount": {
+        "currency_code": "USD",
+        "value": "100.00",
+        "breakdown": {
+          "item_total": {
+            "currency_code": "USD",
+            "value": "100.00"
+          }
+        }
+      },
+      "payee": {
+        "email_address": "sb-yawlm28407032@business.example.com",
+        "merchant_id": "GT25NVQDX7R96"
+      },
+      "items": [
+        {
+          "name": "T-Shirt",
+          "unit_amount": {
+            "currency_code": "USD",
+            "value": "100.00"
+          },
+          "quantity": "1",
+          "description": "Green XL"
+        }
+      ]
+    }
+  ],
+  "create_time": "2023-12-30T10:23:08Z",
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v2/checkout/orders/0AX71814SK731420S",
+      "rel": "self",
+      "method": "GET"
+    },
+    {
+      "href": "https://www.sandbox.paypal.com/checkoutnow?token=0AX71814SK731420S",
+      "rel": "approve",
+      "method": "GET"
+    },
+    {
+      "href": "https://api.sandbox.paypal.com/v2/checkout/orders/0AX71814SK731420S",
+      "rel": "update",
+      "method": "PATCH"
+    },
+    {
+      "href": "https://api.sandbox.paypal.com/v2/checkout/orders/0AX71814SK731420S/capture",
+      "rel": "capture",
+      "method": "POST"
+    }
+  ]
+}
