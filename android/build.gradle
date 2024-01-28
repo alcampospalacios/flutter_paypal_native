@@ -54,7 +54,7 @@ android {
         implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
         implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
-        implementation 'com.alcampospalacios:paypal-dialog-release:1.0.2'
+        implementation 'com.alcampospalacios:paypal-dialog-release:1.0.10'
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'org.mockito:mockito-core:5.0.0'
     }

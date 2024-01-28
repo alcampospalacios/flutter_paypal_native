@@ -78,7 +78,6 @@ public class PaypalNativePlugin extends FlutterIO
     PayPalNativeCallBackHelper payPalNativeCallBackHelper;
     PayPalCallBackDialogHelper payPalCallBackDialogHelper;
 
-    private Context _context;
     private Activity _activity;
 
 
@@ -100,7 +99,7 @@ public class PaypalNativePlugin extends FlutterIO
             makeOrder(call, result);
             return;
         } else if (call.method.equals("FlutterPaypal#captureMoney")) {
-            captureMoney(call, result, application.getApplicationContext());
+            captureMoney(call, result);
     }
         result.notImplemented();
   }
@@ -115,7 +114,7 @@ public class PaypalNativePlugin extends FlutterIO
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
 
         application = binding.getActivity().getApplication();
-      _activity = binding.getActivity();
+        _activity = binding.getActivity();
         initialisePaypalConfig();
     }
 
@@ -196,7 +195,7 @@ public class PaypalNativePlugin extends FlutterIO
         }
     }
 
-    private void captureMoney(@NonNull MethodCall call, @NonNull Result result, @NonNull Context context) {
+    private void captureMoney(@NonNull MethodCall call, @NonNull Result result) {
         String orderId = call.argument("orderId");
 
         String url;
@@ -214,10 +213,10 @@ public class PaypalNativePlugin extends FlutterIO
              paypalOrder = objectMapper.readValue(captureOrderConfigStore.jsonData, PaypalOrder.class);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            paypalOrder = new PaypalOrder();
+            paypalOrder =  PaypalOrder.getEmptyOrder();
         }
 
-        payPalCallBackDialogHelper.setResult(result);
+
 
         BottomSheetLibrary.showBottomSheet(
                 payPalCallBackDialogHelper,
@@ -227,6 +226,8 @@ public class PaypalNativePlugin extends FlutterIO
                 captureOrderConfigStore.accessToken,
                 captureOrderConfigStore.paypalRequestId,
                 url);
+
+        payPalCallBackDialogHelper.setResult(result);
         }
 
 }

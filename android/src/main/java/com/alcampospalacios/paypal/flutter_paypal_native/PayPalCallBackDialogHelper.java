@@ -33,7 +33,13 @@ public class PayPalCallBackDialogHelper implements PaypalDialogListener {
 
     @Override
     public void onSuccessCapture(String s) {
+//        firedOnCapturedCallBackFromDialog();
+    }
+
+    @Override
+    public void onSuccessConfirmedPayment() {
         firedOnCapturedCallBackFromDialog();
+
     }
 
     @Override

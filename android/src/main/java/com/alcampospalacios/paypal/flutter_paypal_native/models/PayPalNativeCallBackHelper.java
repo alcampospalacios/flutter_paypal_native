@@ -87,18 +87,4 @@ public class PayPalNativeCallBackHelper implements PayPalNativeCheckoutListener{
         }
     }
 
-
-    // This method is fired in the capture callback from the money
-    public void firedOnCapturedCallBack() {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("onCapture", "fired");
-
-        // Invoking method called after
-        flutterPaypalPlugin.invokeMethodOnUiThread("FlutterPaypal#onCapture", data);
-        this.result.success("completed");
-
-
-
-    }
-
 }
