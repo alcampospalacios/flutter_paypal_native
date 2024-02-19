@@ -1,1 +1,10 @@
-rootProject.name = 'paypal_native_checkout'
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
+
+rootProject.name = 'flutter_paypal_native'
+

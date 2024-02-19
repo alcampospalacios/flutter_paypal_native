@@ -4,20 +4,17 @@ enum FPayPalEnvironment {
 
   /// Sandbox environment is used for development and testing.
   sandbox,
-
-  /// Stage Environment.
-  stage,
-
-  /// Local environment is used for local or mock web server testing.
-  local;
 }
 
+/// This class contains type of enviroment if is production o testing
+/// * [live] This is production environment
+/// * [sanbox] This is a secure environment to make test
+///
+/// In the native code select url by the type of environment
 class FPayPalEnvironmentHelper {
   static const Map<FPayPalEnvironment, String> codes = {
     FPayPalEnvironment.live: "live",
     FPayPalEnvironment.sandbox: "sandbox",
-    FPayPalEnvironment.stage: "stage",
-    FPayPalEnvironment.local: "local",
   };
 
   //convert enum  to string

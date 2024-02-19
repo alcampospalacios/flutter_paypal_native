@@ -1,11 +1,11 @@
-name: paypal_native_checkout
+name: flutter_paypal_native
 description: A new Flutter plugin project.
 version: 0.0.1
 homepage:
 
 environment:
-  sdk: '>=3.1.2 <4.0.0'
-  flutter: '>=3.3.0'
+  sdk: ">=3.1.2 <4.0.0"
+  flutter: ">=3.3.0"
 
 dependencies:
   flutter:
@@ -35,8 +35,8 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.alcampospalacios.paypal.paypal_native_checkout
-        pluginClass: PaypalNativeCheckoutPlugin
+        package: com.alcampospalacios.paypal.flutter_paypal_native
+        pluginClass: PaypalNativePlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

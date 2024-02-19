@@ -1,10 +1,12 @@
-group 'com.alcampospalacios.paypal.paypal_native_checkout'
+group 'com.alcampospalacios.paypal.flutter_paypal_native'
 version '1.0'
 
 buildscript {
     repositories {
         google()
         mavenCentral()
+//        mavenLocal()
+        maven { url "https://jitpack.io"  }
     }
 
     dependencies {
@@ -23,6 +25,8 @@ rootProject.allprojects {
                 password "AKCp8jQ8tAahqpT5JjZ4FRP2mW7GMoFZ674kGqHmupTesKeAY2G8NcmPKLuTxTGkKjDLRzDUQ"
             }
         }
+//        mavenLocal()
+        maven { url "https://jitpack.io"  }
     }
 }
 
@@ -30,7 +34,7 @@ apply plugin: 'com.android.library'
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.alcampospalacios.paypal.paypal_native_checkout'
+        namespace 'com.alcampospalacios.paypal.flutter_paypal_native'
     }
 
     compileSdkVersion 33
@@ -45,11 +49,18 @@ android {
     }
 
     dependencies {
-        // implementation "com.paypal.android:paypal-native-payments:CURRENT-VERSION"
-        implementation 'com.paypal.checkout:android-sdk:1.1.0'
+
+        implementation "com.paypal.android:paypal-native-payments:1.1.0"
         implementation 'com.google.code.gson:gson:2.9.1'
+        implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+        implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+        implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+        implementation 'com.github.alcampospalacios:paypal_dialog:master-SNAPSHOT'
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'org.mockito:mockito-core:5.0.0'
+        //        implementation 'com.alcampospalacios:paypal-dialog-release:1.0.12'
+
     }
 
     testOptions {
@@ -62,3 +73,9 @@ android {
         }
     }
 }
+
+
+
+
+
+
