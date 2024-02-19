@@ -1,7 +1,7 @@
 name: flutter_paypal_native
 description: A new Flutter plugin project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/alcampospalacios/flutter_paypal_native.git
 
 environment:
   sdk: ">=3.1.2 <4.0.0"
